@@ -5,7 +5,7 @@ This Is A New Flutter Project.
 
 ## Getting Started
 
-This Project Represents An Online Shop Helps The User To Buy What He Wants Easily.
+This project represents an online shop designed to make online shopping easy and convenient for everyone.
 
 A few resources to get you started if this is your first Flutter project:
 
