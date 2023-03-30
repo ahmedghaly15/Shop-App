@@ -1,14 +1,21 @@
 name: shop_app
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=2.19.3 <3.0.0'
+  sdk: ">=2.19.3 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+
+  smooth_page_indicator: ^1.0.1
+  bloc: ^8.1.1
+  flutter_bloc: ^8.1.2
+  shared_preferences: ^2.0.20
+  dio: ^5.1.0
+  conditional_builder_null_safety: ^0.0.6
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +24,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/onBoarding1.jpg
+    - assets/images/onBoarding2.jpg
+    - assets/images/onBoarding3.jpg
+    - assets/images/onBoarding4.png
+
+  fonts:
+    - family: Jannah
+      fonts:
+        - asset: assets/fonts/Janna LT Regular.ttf
