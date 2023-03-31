@@ -1,13 +1,15 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shop_app/modules/auth/cubit/cubit.dart';
-import 'package:shop_app/modules/auth/cubit/states.dart';
-import 'package:shop_app/styles/colors.dart';
-import 'package:shop_app/widgets/helper/components_helper.dart';
 
-import '../../widgets/components/default_button.dart';
-import '../../widgets/components/input_field.dart';
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import '/layout/shop_layout.dart';
+import '/modules/auth/cubit/cubit.dart';
+import '/modules/auth/cubit/states.dart';
+import '/network/local/cache_helper.dart';
+import '/shared/components/default_button.dart';
+import '/shared/components/input_field.dart';
+import '/shared/constants.dart';
+import '/styles/colors.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -18,7 +20,10 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen>
     with SingleTickerProviderStateMixin {
+  // A Key For The Form
   final GlobalKey<FormState> formKey = GlobalKey();
+
+  // Initializing The Auth Mode
   AuthMode authMode = AuthMode.signIn;
 
   //============ TextFormFields Controllers ============
@@ -26,6 +31,10 @@ class _AuthScreenState extends State<AuthScreen>
   final TextEditingController emailController = TextEditingController();
   // Password TextFormField Controller
   final TextEditingController passwordController = TextEditingController();
+  // Username TextFormField Controller
+  final TextEditingController nameController = TextEditingController();
+  // User Phone Controller
+  final TextEditingController phoneController = TextEditingController();
   // Confrim Password TextFormField Controller
   final TextEditingController confirmPassController = TextEditingController();
 
@@ -33,12 +42,6 @@ class _AuthScreenState extends State<AuthScreen>
   bool passVisiblity = true;
   // For Controlling Confirmation Password Visibility
   bool confirmPassVisiblity = true;
-
-  // For Storing User Info
-  final Map<String, String> authData = {
-    'email': '',
-    'pass': '',
-  };
 
   // Animations
   AnimationController? _controller;
@@ -77,31 +80,71 @@ class _AuthScreenState extends State<AuthScreen>
         listener: (context, state) {
           if (state is SignInSuccessState) {
             if (state.signInModel.status!) {
-              print(state.signInModel.message);
-              print(state.signInModel.data!.token);
-            } else {
-              ComponentsHelper.buildSnackBar(
+              //======= In Case User Sign In Successfully =======
+              CacheHelper.saveData(
+                      key: 'token', value: state.signInModel.data!.token)
+                  .then((value) {
+                token = state.signInModel.data!.token;
+                navigateAndFinish(context, screen: const ShopLayout());
+              });
+              buildSnackBar(
                 context: context,
                 message: state.signInModel.message!,
-                color: Colors.red,
+                state: SnackBarStates.success,
               );
-              print(state.signInModel.message);
+            }
+            //======= In Case There's A Problem Signing The User In =======
+            else {
+              buildSnackBar(
+                context: context,
+                message: state.signInModel.message!,
+                state: SnackBarStates.error,
+              );
+            }
+          }
+          if (state is SignUpSuccessState) {
+            //======= In Case User Sign Up Successfully =======
+            if (state.signInModel.status!) {
+              CacheHelper.saveData(
+                      key: 'token', value: state.signInModel.data!.token)
+                  .then((value) {
+                token = state.signInModel.data!.token;
+                navigateAndFinish(context, screen: const ShopLayout());
+              });
+              buildSnackBar(
+                context: context,
+                message: state.signInModel.message!,
+                state: SnackBarStates.success,
+              );
+            }
+            //======= In Case There's A Problem Signing The User Up =======
+            else {
+              buildSnackBar(
+                context: context,
+                message: state.signInModel.message!,
+                state: SnackBarStates.error,
+              );
+              // print(state.signInModel.message);
             }
           }
         },
         builder: (context, state) {
           return LayoutBuilder(
             builder: (BuildContext context, _) {
+              // For Getting The Screen Width
               double screenWidth = MediaQuery.of(context).size.width;
+              // For Getting The Screen Height
               double screenHeight = MediaQuery.of(context).size.height;
               return GestureDetector(
+                // For Closing The Keyboard When The Screen Is Tapped
                 onTap: () => FocusScope.of(context).unfocus(),
                 child: Scaffold(
                   body: Center(
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.06),
+                          horizontal: screenWidth * 0.06,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -115,7 +158,7 @@ class _AuthScreenState extends State<AuthScreen>
                                   .copyWith(
                                     fontSize: 40,
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor,
+                                    color: defaultColor,
                                   ),
                             ),
                             Text(
@@ -129,37 +172,66 @@ class _AuthScreenState extends State<AuthScreen>
                                     color: Colors.black54,
                                   ),
                             ),
-                            SizedBox(
-                              height: screenHeight * 0.025,
-                            ),
+                            //======== For Adding Some Space ========
+                            SizedBox(height: screenHeight * 0.025),
+                            //======================= Auth Form =======================
                             Form(
                               key: formKey,
                               child: Column(
                                 children: <Widget>[
+                                  //======== Email Input Field ========
                                   InputField(
                                     key: const ValueKey("email"),
                                     hint: "Email",
                                     controller: emailController,
                                     obsecure: false,
                                     keyboardType: TextInputType.emailAddress,
+                                    textCapitalization: TextCapitalization.none,
                                     validating: (val) {
                                       if (val!.isEmpty || !val.contains('@')) {
                                         return "Enter an email";
                                       }
                                       return null;
-                                      // return "";
-                                    },
-                                    saving: (val) {
-                                      authData['email'] = val!;
                                     },
                                   ),
+                                  //======== User Name Input Field ========
+                                  if (authMode == AuthMode.signUp)
+                                    //======= For Adding Some Space =======
+                                    SizedBox(height: screenHeight * 0.02),
+                                  if (authMode == AuthMode.signUp)
+                                    AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 400),
+                                      curve: Curves.easeIn,
+                                      child: SlideTransition(
+                                        position: _slideAnimation!,
+                                        child: InputField(
+                                          key: const ValueKey("name"),
+                                          hint: "User name",
+                                          controller: nameController,
+                                          obsecure: false,
+                                          keyboardType: TextInputType.name,
+                                          textCapitalization:
+                                              TextCapitalization.words,
+                                          validating: (val) {
+                                            if (val!.isEmpty) {
+                                              return "Enter a user name";
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  //======== For Adding Some Space ==========
                                   SizedBox(height: screenHeight * 0.02),
+                                  //======== Password Input Field =========
                                   InputField(
                                     key: const ValueKey("password"),
                                     hint: "Password",
                                     controller: passwordController,
                                     obsecure: passVisiblity,
                                     keyboardType: TextInputType.visiblePassword,
+                                    textCapitalization: TextCapitalization.none,
                                     icon: IconButton(
                                       onPressed: () {
                                         setState(() {
@@ -173,15 +245,10 @@ class _AuthScreenState extends State<AuthScreen>
                                     validating: (val) {
                                       if (val!.isEmpty) {
                                         return "Enter a password";
-                                      } else if (val.length < 8) {
+                                      } else if (val.length < 6) {
                                         return "Too short pasword";
                                       }
                                       return null;
-                                      // return val;
-                                      // return "";
-                                    },
-                                    saving: (val) {
-                                      authData['pass'] = val!;
                                     },
                                     onSubmit: (String value) {
                                       if (formKey.currentState!.validate()) {
@@ -194,7 +261,9 @@ class _AuthScreenState extends State<AuthScreen>
                                       }
                                     },
                                   ),
+                                  //======== For Adding Some Space =========
                                   SizedBox(height: screenHeight * 0.02),
+                                  //======== Confirm Password Input Field ========
                                   if (authMode == AuthMode.signUp)
                                     AnimatedContainer(
                                       duration:
@@ -210,6 +279,8 @@ class _AuthScreenState extends State<AuthScreen>
                                           obsecure: confirmPassVisiblity,
                                           keyboardType:
                                               TextInputType.visiblePassword,
+                                          textCapitalization:
+                                              TextCapitalization.none,
                                           icon: IconButton(
                                             onPressed: () {
                                               setState(() {
@@ -223,46 +294,76 @@ class _AuthScreenState extends State<AuthScreen>
                                           ),
                                           validating: (val) {
                                             if (val! !=
-                                                passwordController.text) {
+                                                    passwordController.text ||
+                                                val.isEmpty) {
                                               return "Password doesn't match";
                                             }
                                             return null;
-                                            // return null;
                                           },
-                                          saving: (val) {
-                                            authData['pass'] = val!;
-                                          },
-                                          onSubmit: (String value) {},
                                         ),
                                       ),
                                     ),
-
-                                  SizedBox(
-                                    height: screenHeight * 0.02,
-                                  ),
-
+                                  //======== Phone Input Field ========
+                                  if (authMode == AuthMode.signUp)
+                                    //======= For Adding Some Space =======
+                                    SizedBox(height: screenHeight * 0.02),
+                                  if (authMode == AuthMode.signUp)
+                                    AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 400),
+                                      curve: Curves.easeIn,
+                                      child: SlideTransition(
+                                        position: _slideAnimation!,
+                                        child: InputField(
+                                          key: const ValueKey("phone"),
+                                          hint: "Phone number",
+                                          controller: phoneController,
+                                          obsecure: false,
+                                          keyboardType: TextInputType.phone,
+                                          textCapitalization:
+                                              TextCapitalization.none,
+                                          validating: (val) {
+                                            if (val!.isEmpty) {
+                                              return "Enter a phone number";
+                                            }
+                                            return null;
+                                          },
+                                          onSubmit: (String value) {
+                                            if (formKey.currentState!
+                                                .validate()) {
+                                              FocusScope.of(context).unfocus();
+                                              AuthScreenCubit.getObject(context)
+                                                  .userSignUp(
+                                                username: nameController.text,
+                                                email: emailController.text,
+                                                password:
+                                                    passwordController.text,
+                                                phone: phoneController.text,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  //======= For Adding Some Space =======
+                                  SizedBox(height: screenHeight * 0.02),
+                                  //=========== Sign In & Up Button ===========
                                   Align(
                                     alignment: Alignment.center,
                                     child: ConditionalBuilder(
-                                      condition: state is! SignInLoadingState,
+                                      condition: state is! SignInLoadingState &&
+                                          state is! SignUpLoadingState,
                                       builder: (context) => DefaultButton(
                                         buttonText: authMode == AuthMode.signIn
-                                            ? "SIGN IN"
-                                            : "SIGN UP",
+                                            ? "Sign In"
+                                            : "Sign Up",
                                         onPressed: () =>
                                             signInOrSignUp(context),
                                         screenHeight: screenHeight,
                                         screenWidth: screenWidth,
-                                        height: 0.02,
+                                        height: 0.015,
                                         width: 0.33,
                                         buttonRaduis: 0.05,
-                                        textStyle: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge!
-                                            .copyWith(
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                            ),
                                       ),
                                       fallback: (context) => const Center(
                                         child: CircularProgressIndicator(
@@ -271,7 +372,7 @@ class _AuthScreenState extends State<AuthScreen>
                                       ),
                                     ),
                                   ),
-                                  // For Adding Some Space
+                                  //========= For Adding Some Space =========
                                   SizedBox(height: screenHeight * 0.02),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -288,8 +389,8 @@ class _AuthScreenState extends State<AuthScreen>
                                         onPressed: switchAuthMode,
                                         child: Text(
                                           authMode == AuthMode.signIn
-                                              ? "SIGN UP"
-                                              : "SIGN IN",
+                                              ? "Sign Up"
+                                              : "Sign In",
                                           style: Theme.of(context)
                                               .textTheme
                                               .titleMedium!
@@ -318,6 +419,7 @@ class _AuthScreenState extends State<AuthScreen>
     );
   }
 
+  //=========== For Switching Between Auth Modes ===========
   void switchAuthMode() {
     if (authMode == AuthMode.signIn) {
       setState(() {
@@ -333,17 +435,27 @@ class _AuthScreenState extends State<AuthScreen>
     }
   }
 
+  //=========== For Signing The User In or Up ===========
   void signInOrSignUp(BuildContext ctx) {
-    if (authMode == AuthMode.signIn) {
-      if (formKey.currentState!.validate()) {
+    if (formKey.currentState!.validate()) {
+      //======== Signing The User In ========
+      if (authMode == AuthMode.signIn) {
         FocusScope.of(ctx).unfocus();
         AuthScreenCubit.getObject(ctx).userSignIn(
           email: emailController.text,
           password: passwordController.text,
         );
       }
-    } else if (authMode == AuthMode.signUp) {
-      print("Sign up mode");
+      //======== Signing The User Up ========
+      else if (authMode == AuthMode.signUp) {
+        FocusScope.of(ctx).unfocus();
+        AuthScreenCubit.getObject(ctx).userSignUp(
+          username: nameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          phone: phoneController.text,
+        );
+      }
     }
   }
 }

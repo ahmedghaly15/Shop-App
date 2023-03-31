@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shop_app/models/on_boarding_model.dart';
-import 'package:shop_app/modules/on_boarding/cubit/cubit.dart';
-import 'package:shop_app/modules/on_boarding/cubit/states.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../../styles/colors.dart';
+import '/models/on_boarding_model.dart';
+import '/modules/on_boarding/cubit/cubit.dart';
+import '/modules/on_boarding/cubit/states.dart';
+import '/styles/colors.dart';
 
 class OnBoardingScreen extends StatelessWidget {
   const OnBoardingScreen({super.key});
@@ -15,8 +15,8 @@ class OnBoardingScreen extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     PageController boardPageController = PageController();
-    // bool isLastBoarding = false;
 
+    //======= OnBoarding Pages Content =======
     List<OnBoardingModel> boarding = [
       OnBoardingModel(
         imgPath: 'assets/images/onBoarding1.jpg',
@@ -39,22 +39,22 @@ class OnBoardingScreen extends StatelessWidget {
         body: "You can pay as you like",
       ),
     ];
+
     return BlocProvider(
-      create: (BuildContext context) => ShopAppCubit(),
-      child: BlocConsumer<ShopAppCubit, OnBoardingStates>(
+      create: (BuildContext context) => OnBoardingScreenCubit(),
+      child: BlocConsumer<OnBoardingScreenCubit, OnBoardingStates>(
         listener: (context, state) {},
         builder: (context, state) {
-          ShopAppCubit cubit = ShopAppCubit.getObject(context);
+          OnBoardingScreenCubit cubit =
+              OnBoardingScreenCubit.getObject(context);
           return Scaffold(
             appBar: AppBar(
               actions: <Widget>[
                 TextButton(
-                  onPressed: () => cubit.skipOnBoardingScreen(context),
+                  onPressed: () => cubit.navigateDirectlyToAuthScreen(context),
                   child: const Text(
                     "SKIP",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
                   ),
                 ),
               ],
@@ -76,17 +76,11 @@ class OnBoardingScreen extends StatelessWidget {
                         boarding[index],
                       ),
                       itemCount: boarding.length,
-                      onPageChanged: (int index) {
-                        cubit.onChangePageIndex(index, boarding);
-                        // if (index == boarding.length - 1) {
-                        //   // last element in the list
-                        //   setState(() => isLastBoarding = true);
-                        // } else {
-                        //   setState(() => isLastBoarding = false);
-                        // }
-                      },
+                      onPageChanged: (int index) =>
+                          cubit.onChangePageIndex(index, boarding),
                     ),
                   ),
+                  //======== For Adding Some Space ==========
                   SizedBox(height: screenHeight * 0.01),
                   Row(
                     children: <Widget>[
@@ -104,12 +98,10 @@ class OnBoardingScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       FloatingActionButton(
-                        onPressed: () {
-                          cubit.navigateToAuthScreen(
-                            context,
-                            boardPageController,
-                          );
-                        },
+                        onPressed: () => cubit.navigateToAuthScreen(
+                          context,
+                          boardPageController,
+                        ),
                         child: const Icon(Icons.arrow_forward_ios),
                       ),
                     ],
@@ -123,6 +115,7 @@ class OnBoardingScreen extends StatelessWidget {
     );
   }
 
+  //================== For Building On Boarding Items ==================
   Widget buildOnBoardingItem(
     double screenWidth,
     double screenHeight,

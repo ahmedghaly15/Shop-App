@@ -1,6 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:shop_app/models/sign_in_model.dart';
+import '/models/sign_in_model.dart';
 
+//==================== Auth Screen States ====================
 abstract class AuthScreenStates {}
 
 class AuthScreenInitialState extends AuthScreenStates {}
@@ -15,4 +15,16 @@ class SignInSuccessState extends AuthScreenStates {
 class SignInErrorState extends AuthScreenStates {
   final String error;
   SignInErrorState(this.error);
+}
+
+class SignUpLoadingState extends AuthScreenStates {}
+
+class SignUpSuccessState extends AuthScreenStates {
+  final SignInModel signInModel;
+  SignUpSuccessState(this.signInModel);
+}
+
+class SignUpErrorState extends AuthScreenStates {
+  final String error;
+  SignUpErrorState(this.error);
 }

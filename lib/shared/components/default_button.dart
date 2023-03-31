@@ -9,7 +9,6 @@ class DefaultButton extends StatelessWidget {
   final double width;
   final double buttonRaduis;
   final void Function()? onPressed;
-  final TextStyle textStyle;
 
   const DefaultButton({
     super.key,
@@ -20,7 +19,6 @@ class DefaultButton extends StatelessWidget {
     required this.height,
     required this.width,
     required this.buttonRaduis,
-    required this.textStyle,
   });
 
   @override
@@ -41,7 +39,12 @@ class DefaultButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(screenWidth * buttonRaduis),
           ),
         ),
-        textStyle: MaterialStateProperty.all(textStyle),
+        textStyle: MaterialStateProperty.all(
+          const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       child: Text(buttonText),
     );

@@ -1,51 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/modules/on_boarding/cubit/states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../models/on_boarding_model.dart';
 import '../../auth/auth_screen.dart';
+import '/models/on_boarding_model.dart';
+import '/modules/on_boarding/cubit/states.dart';
+import '/network/local/cache_helper.dart';
+import '/shared/constants.dart';
 
-class ShopAppCubit extends Cubit<OnBoardingStates> {
-  ShopAppCubit() : super(InitialOnBoardingState());
+//========================== On Boarding Screen Cubit ==========================
+class OnBoardingScreenCubit extends Cubit<OnBoardingStates> {
+  OnBoardingScreenCubit() : super(InitialOnBoardingState());
 
-  static ShopAppCubit getObject(context) => BlocProvider.of(context);
+  //============ Getting An Object Of The Cubit ============
+  static OnBoardingScreenCubit getObject(context) => BlocProvider.of(context);
 
+  // To Check If The Current Screen Is OnBoardingScreen Or Not
   bool isLastBoarding = false;
 
+  //=========== For Navigating Between OnBoarding Screen Pages ===========
   void onChangePageIndex(int index, List<OnBoardingModel> modelList) {
     if (index == modelList.length - 1) {
       isLastBoarding = true;
-      print("last");
     } else {
       isLastBoarding = false;
-      print("not last");
     }
     emit(PageViewIndexChangedState());
   }
 
+  //=========== For Navigating To Auth Screen According To isLastBoarding ===========
   void navigateToAuthScreen(context, PageController boardPageController) {
-    getObject(context).isLastBoarding
-        ? Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AuthScreen(),
-            ),
-            (Route<dynamic> route) => false,
-          )
-        : boardPageController.nextPage(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.fastLinearToSlowEaseIn,
-          );
+    //=========== Navigating To Auth Screen When The Last Page Is Reached ===========
+    if (getObject(context).isLastBoarding) {
+      navigateDirectlyToAuthScreen(context);
+      emit(GetToAuthScreenState());
+    }
+    //=========== For Navigating To The Next Page When The Last Page Is Not Reached ===========
+    boardPageController.nextPage(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastLinearToSlowEaseIn,
+    );
 
-    emit(GetToAuthScreenState());
+    emit(PageViewIndexChangedState());
   }
 
-  void skipOnBoardingScreen(context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthScreen()),
-      (Route<dynamic> route) => false, // remove all previous routes
-    );
-    emit(SkipOnBoardingState());
+  //============ For Moving Directly To Auth Screen ============
+  void navigateDirectlyToAuthScreen(context) {
+    CacheHelper.saveData(key: 'onBoarding', value: true).then((value) {
+      if (value) {
+        navigateAndFinish(context, screen: const AuthScreen());
+        emit(SkipOnBoardingState());
+      }
+    });
   }
 }

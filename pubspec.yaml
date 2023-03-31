@@ -16,6 +16,7 @@ dependencies:
   shared_preferences: ^2.0.20
   dio: ^5.1.0
   conditional_builder_null_safety: ^0.0.6
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

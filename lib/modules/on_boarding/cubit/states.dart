@@ -1,3 +1,4 @@
+//========================== On Boarding Screen States ==========================
 abstract class OnBoardingStates {}
 
 class InitialOnBoardingState extends OnBoardingStates {}

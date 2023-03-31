@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
+import '/styles/colors.dart';
 
 class InputField extends StatelessWidget {
   final String hint;
   final bool? obsecure;
   final Widget? icon;
+  final Widget? prefixIcon;
   final TextEditingController controller;
+  final TextCapitalization textCapitalization;
   final String? Function(String?)? validating;
   final TextInputType keyboardType;
-  final Function(String?)? saving;
   final void Function(String)? onSubmit;
 
   const InputField({
     Key? key,
     required this.hint,
     required this.controller,
-    this.obsecure,
-    this.icon,
+    required this.textCapitalization,
     required this.validating,
     required this.keyboardType,
+    this.obsecure,
+    this.prefixIcon,
+    this.icon,
     this.onSubmit,
-    this.saving,
   }) : super(key: key);
 
   @override
@@ -29,11 +32,14 @@ class InputField extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
-              color: Colors.black45,
-            ),
+        hintStyle: const TextStyle(
+          fontSize: 18,
+          color: Colors.grey,
+        ),
+        prefixIcon: prefixIcon,
+        prefixIconColor: defaultColor,
         suffixIcon: icon,
-        suffixIconColor: Theme.of(context).primaryColor,
+        suffixIconColor: defaultColor,
         contentPadding: const EdgeInsets.all(10),
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(
@@ -43,8 +49,8 @@ class InputField extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
+          borderSide: const BorderSide(
+            color: defaultColor,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(15),
@@ -58,12 +64,15 @@ class InputField extends StatelessWidget {
         ),
       ),
       cursorColor: Colors.grey[700],
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: const TextStyle(
+        fontSize: 20,
+        color: Colors.black,
+      ),
       obscureText: obsecure!,
       keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
       validator: validating,
       onFieldSubmitted: onSubmit,
-      onSaved: saving,
     );
   }
 }
