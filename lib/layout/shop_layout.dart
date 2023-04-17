@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shop_app/styles/colors.dart';
 import '/layout/cubit/cubit.dart';
 import '/layout/cubit/states.dart';
 import '/modules/search/search_screen.dart';
@@ -23,12 +24,13 @@ class ShopLayout extends StatelessWidget {
               title: Text(cubit.titles[cubit.currentIndex]),
               actions: <Widget>[
                 IconButton(
-                    onPressed: () => navigateTo(context, const SearchScreen()),
-                    icon: const Icon(
-                      Icons.search,
-                      color: Colors.black,
-                      size: 30,
-                    )),
+                  onPressed: () => navigateTo(context, const SearchScreen()),
+                  icon: const Icon(
+                    Icons.search,
+                    color: defaultColor,
+                    size: 30,
+                  ),
+                ),
               ],
             ),
             body: cubit.bottomNavScreens[cubit.currentIndex],

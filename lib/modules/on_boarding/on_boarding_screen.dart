@@ -54,7 +54,11 @@ class OnBoardingScreen extends StatelessWidget {
                   onPressed: () => cubit.navigateDirectlyToAuthScreen(context),
                   child: const Text(
                     "SKIP",
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 20,
+                      color: defaultColor,
+                    ),
                   ),
                 ),
               ],
@@ -98,6 +102,7 @@ class OnBoardingScreen extends StatelessWidget {
                       ),
                       const Spacer(),
                       FloatingActionButton(
+                        backgroundColor: defaultColor,
                         onPressed: () => cubit.navigateToAuthScreen(
                           context,
                           boardPageController,
