@@ -23,11 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (onBoarding != null) {
       if (token != null)
-        navigateTo(context, const ShopLayout());
+        navigateAndFinish(context, screen: const ShopLayout());
       else
-        navigateTo(context, const AuthScreen());
+        navigateAndFinish(context, screen: const AuthScreen());
     } else {
-      navigateTo(context, const OnBoardingScreen());
+      navigateAndFinish(context, screen: const OnBoardingScreen());
     }
   }
 
